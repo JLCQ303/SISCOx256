@@ -1,0 +1,36 @@
+import socket
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: python KnockKnockClient.py <host name> <port number>")
+        sys.exit(1)
+
+    host_name = sys.argv[1]
+    port_number = int(sys.argv[2])
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as kk_socket:
+            kk_socket.connect((host_name, port_number))
+            with kk_socket.makefile('r') as in_stream, kk_socket.makefile('w') as out_stream:
+                while True:
+                    from_server = in_stream.readline().strip()
+                    if not from_server:
+                        break
+                    print(f"Server: {from_server}")
+                    if from_server == "Bye.":
+                        break
+
+                    from_user = input("Client: ")
+                    if from_user:
+                        out_stream.write(from_user + "\n")
+                        out_stream.flush()
+    except socket.gaierror:
+        print(f"Don't know about host {host_name}")
+        sys.exit(1)
+    except ConnectionRefusedError:
+        print(f"Couldn't get I/O for the connection to {host_name}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    import sys
+    main()
